@@ -28,8 +28,3 @@ class Pagamento(ABC):
         if value < 0:
             raise ValueError("O valor pago não pode ser negativo")
         self.__valorPago = value
-    
-    @abstractmethod
-    def processar(self):
-        """Método abstrato que deve ser implementado pelas subclasses"""
-        pass
