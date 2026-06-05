@@ -1,4 +1,5 @@
-class Pessoa():
+from abc import ABC
+class Pessoa(ABC):
     def __init__(self, nome: str, celular: str, cpf: str):
         super().__init__()
         self.nome = nome
@@ -40,5 +41,4 @@ class Pessoa():
         if len(cpf.strip()) != 11:
             raise ValueError("O CPF deve conter exatamente 11 caracteres.")
         self.__cpf = cpf
-    
-    
+

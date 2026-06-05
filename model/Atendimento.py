@@ -14,6 +14,8 @@ class Atendimento:
         self.horaInicio = horaInicio
         self.horaFim = horaFim
         self.valor = valor
+        self.procedimentos = []
+        self.pagamentos = []
 
     @property
     def clinica(self):
@@ -72,8 +74,6 @@ class Atendimento:
     def horaInicio(self, value):
         if not isinstance(value, datetime.time):
             raise ValueError("A hora de início deve ser do tipo datetime.time")
-        if value < 0:
-            raise ValueError("A hora de início não pode ser negativa")
         self.__horaInicio = value
 
     @property
@@ -84,8 +84,6 @@ class Atendimento:
     def horaFim(self, value):
         if not isinstance(value, datetime.time):
             raise ValueError("A hora de fim deve ser do tipo datetime.time")
-        if value < 0:
-            raise ValueError("A hora de fim não pode ser negativa")
         self.__horaFim = value
 
     @property
