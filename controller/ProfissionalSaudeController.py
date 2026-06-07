@@ -1,5 +1,4 @@
 from model.ProfissionalSaude import ProfissionalSaude
-import datetime
 
 
 class ProfissionalSaudeController:

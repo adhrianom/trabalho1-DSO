@@ -4,6 +4,7 @@ from controller.ProfissionalSaudeController import ProfissionalSaudeController
 from controller.TipoAtendimentoController import TipoAtendimentoController
 from controller.AtendimentoController import AtendimentoController
 from controller.PagamentoController import PagamentoController
+import os
 
 class SistemaController:
     def __init__(self, view):
@@ -26,8 +27,13 @@ class SistemaController:
         )
         self.pagamentos = []
         self.pagamento_controller = PagamentoController(self.pagamentos, self.atendimentos)
+    
+    def limparTela(self):
+         os.system('cls')
+
     def iniciarSistema(self):
         while True:
+            self.limparTela()
             self.view.mostrarMenuPrincipal()
             opcao = self.view.lerOpcao()
 
@@ -45,15 +51,14 @@ class SistemaController:
 
     def abrirMenuCadastros(self):
         while True:
+            self.limparTela()
             print("\n=== CADASTROS ===")
             print("1 - Clinicas")
             print("2 - Pacientes")
             print("3 - Profissionais de Saúde")
             print("4 - Tipos de Atendimento")
-            print("5 - Atendimentos")
-            print("6 - Pagamentos")
             print("0 - Voltar")
-            opcao = input("Escolha uma opcao: ")
+            opcao = input("Escolha uma opção: ")
 
             if opcao == "1":
                 self.menuClinicas()
@@ -63,14 +68,10 @@ class SistemaController:
                 self.menuProfissionalSaude()
             elif opcao == "4":
                 self.menuTipoAtendimento()
-            elif opcao == "5":
-                self.menuAtendimento()
-            elif opcao == "6":
-                self.menuPagamentos()
             elif opcao == "0":
                 break
             else:
-                print("Opcao invalida.")
+                print("Opção inválida.")
 
     def menuClinicas(self):
         while True:
@@ -81,7 +82,7 @@ class SistemaController:
             print("4 - Excluir")
             print("0 - Voltar")
 
-            opcao = input("Escolha uma opcao: ")
+            opcao = input("Escolha uma opção: ")
 
             if opcao == "1":
                 self.clinica_controller.incluir()
@@ -94,7 +95,7 @@ class SistemaController:
             elif opcao == "0":
                 break
             else:
-                print("Opcao invalida.")
+                print("Opção inválida.")
 
     def menuPacientes(self):
         while True:
@@ -105,7 +106,7 @@ class SistemaController:
             print("4 - Excluir")
             print("0 - Voltar")
 
-            opcao = input("Escolha uma opcao: ")
+            opcao = input("Escolha uma opção: ")
 
             if opcao == "1":
                 self.paciente_controller.incluir()
@@ -129,7 +130,7 @@ class SistemaController:
             print("4 - Excluir")
             print("0 - Voltar")
 
-            opcao = input("Escolha uma opcao: ")
+            opcao = input("Escolha uma opção: ")
 
             if opcao == "1":
                 self.profissional_controller.incluir()
@@ -166,7 +167,22 @@ class SistemaController:
             elif opcao == "0":
                     break
             else:
-                    print("Opcao invalida.")
+                    print("Opção invalida.")
+    
+    def abrirMenuRegistros(self):
+        while True:
+            self.limparTela()
+            self.view.mostrarMenuRegistros()
+            opcao = self.view.lerOpcao()
+
+            if opcao == "0":
+                break
+            elif opcao == "1":
+                self.menuAtendimento()
+            elif opcao == "2":
+                self.menuPagamentos()
+            else:
+                print("Opção invalida.")
 
     def menuAtendimento(self):
         while True:
@@ -178,7 +194,7 @@ class SistemaController:
             print("5 - Adicionar Procedimento")
             print("0 - Voltar")
 
-            opcao = input("Escolha uma opcao: ")
+            opcao = input("Escolha uma opção: ")
 
             if opcao == "1":
                     self.atendimento_controller.incluir()
@@ -193,7 +209,7 @@ class SistemaController:
             elif opcao == "0":
                     break
             else:
-                    print("Opcao invalida.")
+                    print("Opção invalida.")
     def menuPagamentos(self):
         while True:
             print("\n=== MENU PAGAMENTOS ===")
@@ -203,7 +219,7 @@ class SistemaController:
             print("4 - Excluir")
             print("0 - Voltar")
 
-            opcao = input("Escolha uma opcao: ")
+            opcao = input("Escolha uma opção: ")
 
             if opcao == "1":
                     self.pagamento_controller.incluir()
@@ -216,24 +232,113 @@ class SistemaController:
             elif opcao == "0":
                     break
             else:
-                    print("Opcao invalida.")
-    
-    def abrirMenuRegistros(self):
-        while True:
-            self.view.mostrarMenuRegistros()
-            opcao = self.view.lerOpcao()
-
-            if opcao == "0":
-                break
-            else:
-                self.view.mostrarMensagem("Modulo ainda em construção.")
+                    print("Opção inválida.")
 
     def abrirMenuRelatorios(self):
         while True:
+            self.limparTela()
             self.view.mostrarMenuRelatorios()
             opcao = self.view.lerOpcao()
 
             if opcao == "0":
                 break
+            elif opcao == "1":
+                self.relatorioClinicasComMaisAtendimentos()
+            elif opcao == "2":
+                self.relatorioAtendimentosMaisCarosEBaratos()
+            elif opcao == "3":
+                self.relatorioProcedimentosMaisRealizados()
+            elif opcao == "4":
+                self.relatorioProcedimentosMaisCarosEBaratos()
             else:
-                self.view.mostrarMensagem("Modulo ainda em construção.")
+                self.view.mostrarMensagem("Opção inválida.")
+    
+    def relatorioClinicasComMaisAtendimentos(self):
+        if len(self.atendimentos) == 0:
+            print("Nenhum atendimento cadastrado.")
+            return
+
+        contagem = {}
+
+        for atendimento in self.atendimentos:
+            nome_clinica = atendimento.clinica.nome
+            if nome_clinica in contagem:
+                contagem[nome_clinica] += 1
+            else:
+                contagem[nome_clinica] = 1
+
+        maior = max(contagem.values())
+
+        print("\n=== CLINICAS COM MAIS ATENDIMENTOS ===")
+        for clinica, quantidade in contagem.items():
+            if quantidade == maior:
+                print(clinica, "-", quantidade, "atendimentos")
+    
+    def relatorioAtendimentosMaisCarosEBaratos(self):
+        if len(self.atendimentos) == 0:
+            print("Nenhum atendimento cadastrado.")
+            return
+
+        mais_caro = self.atendimentos[0]
+        mais_barato = self.atendimentos[0]
+
+        for atendimento in self.atendimentos:
+            if atendimento.valor > mais_caro.valor:
+                mais_caro = atendimento
+            if atendimento.valor < mais_barato.valor:
+                mais_barato = atendimento
+
+        print("\n=== ATENDIMENTO MAIS CARO ===")
+        print(mais_caro.paciente.nome, "-", mais_caro.clinica.nome, "-", mais_caro.valor)
+
+        print("\n=== ATENDIMENTO MAIS BARATO ===")
+        print(mais_barato.paciente.nome, "-", mais_barato.clinica.nome, "-", mais_barato.valor)
+    
+    def relatorioProcedimentosMaisRealizados(self):
+        contagem = {}
+
+        for atendimento in self.atendimentos:
+            for procedimento in atendimento.procedimentos:
+                descricao = procedimento.descricao
+                if descricao in contagem:
+                    contagem[descricao] += 1
+                else:
+                    contagem[descricao] = 1
+
+        if len(contagem) == 0:
+            print("Nenhum procedimento cadastrado.")
+            return
+
+        maior = max(contagem.values())
+
+        print("\n=== PROCEDIMENTOS MAIS REALIZADOS ===")
+        for descricao, quantidade in contagem.items():
+            if quantidade == maior:
+                print(descricao, "-", quantidade, "vezes")
+        
+    def relatorioProcedimentosMaisCarosEBaratos(self):
+        procedimentos = []
+
+        for atendimento in self.atendimentos:
+            for procedimento in atendimento.procedimentos:
+                procedimentos.append(procedimento)
+
+        if len(procedimentos) == 0:
+            print("Nenhum procedimento cadastrado.")
+            return
+
+        mais_caro = procedimentos[0]
+        mais_barato = procedimentos[0]
+
+        for procedimento in procedimentos:
+            if procedimento.custo > mais_caro.custo:
+                mais_caro = procedimento
+            if procedimento.custo < mais_barato.custo:
+                mais_barato = procedimento
+
+        print("\n=== PROCEDIMENTO MAIS CARO ===")
+        print(mais_caro.descricao, "-", mais_caro.custo)
+
+        print("\n=== PROCEDIMENTO MAIS BARATO ===")
+        print(mais_barato.descricao, "-", mais_barato.custo)
+            

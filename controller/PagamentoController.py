@@ -35,7 +35,7 @@ class PagamentoController:
             print("1 - Dinheiro")
             print("2 - PIX")
             print("3 - Cartao de credito")
-            tipo = input("Escolha uma opcao: ")
+            tipo = input("Escolha uma opção: ")
 
             if tipo == "1":
                 pagamento = PagamentoDinheiro(data, valor_pago)
@@ -50,13 +50,18 @@ class PagamentoController:
                 pagamento = PagamentoCartaoCredito(numero_cartao, bandeira, data, valor_pago)
 
             else:
-                print("Opcao invalida.")
+                print("Opção invalida.")
                 return
+            
+            if valor_pago < atendimento.valor:
+                raise ValueError("O valor do pagamento deve ser igual ao valor do atendimento.")
+            
+            else:
+                self.pagamentos.append(pagamento)
+                atendimento.pagamentos.append(pagamento)
 
-            self.pagamentos.append(pagamento)
-            atendimento.pagamentos.append(pagamento)
+                print("Pagamento cadastrado com sucesso.")
 
-            print("Pagamento cadastrado com sucesso.")
         except (ValueError, IndexError) as e:
             print("Erro ao cadastrar pagamento:", e)
 
