@@ -19,7 +19,7 @@ class AtendimentoController:
         try:
             print("\nClínicas:")
             for i in range(len(self.clinicas)):
-                print(i, "-", self.clinicas[i].nome)
+                print(i, "-", self.clinicas[i].nome, " (Abertura:", self.clinicas[i].horarioAbertura, "- Fechamento:", self.clinicas[i].horarioFechamento, ")")
             indice_clinica = int(input("Escolha a clínica: "))
             clinica = self.clinicas[indice_clinica]
 
@@ -58,10 +58,10 @@ class AtendimentoController:
             hora_fim = datetime.datetime.strptime(hora_fim, "%H:%M").time()
 
             if hora_inicio >= hora_fim:
-                raise ValueError("A hora de início deve ser menor que a hora de fim.")
+                raise ValueError(f"A hora de início deve ser menor que a hora de fim.")
 
             if hora_inicio < clinica.horarioAbertura or hora_fim > clinica.horarioFechamento:
-                raise ValueError("O atendimento deve estar dentro do horário de funcionamento da clínica.")
+                raise ValueError(f"O atendimento deve estar dentro do horário de funcionamento da clínica.\nAbertura: {clinica.horarioAbertura} - Fechamento: {clinica.horarioFechamento}")
 
             valor = float(input("Valor: "))
 
@@ -114,7 +114,7 @@ class AtendimentoController:
 
             print("\nClínicas:")
             for i in range(len(self.clinicas)):
-                print(i, "-", self.clinicas[i].nome)
+                print(i, "-", self.clinicas[i].nome, " (Abertura:", self.clinicas[i].horarioAbertura, "- Fechamento:", self.clinicas[i].horarioFechamento, ")")
             indice_clinica = int(input("Escolha a clínica: "))
             clinica = self.clinicas[indice_clinica]
 
