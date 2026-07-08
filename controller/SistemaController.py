@@ -74,28 +74,7 @@ class SistemaController:
                 print("Opção inválida.")
 
     def menuClinicas(self):
-        while True:
-            print("\n=== MENU CLINICAS ===")
-            print("1 - Incluir")
-            print("2 - Listar")
-            print("3 - Alterar")
-            print("4 - Excluir")
-            print("0 - Voltar")
-
-            opcao = input("Escolha uma opção: ")
-
-            if opcao == "1":
-                self.clinica_controller.incluir()
-            elif opcao == "2":
-                self.clinica_controller.listar()
-            elif opcao == "3":
-                self.clinica_controller.alterar()
-            elif opcao == "4":
-                self.clinica_controller.excluir()
-            elif opcao == "0":
-                break
-            else:
-                print("Opção inválida.")
+        self.clinica_controller.abrirTela()
 
     def menuPacientes(self):
         while True:

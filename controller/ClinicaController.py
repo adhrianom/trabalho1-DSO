@@ -1,18 +1,20 @@
 from model.Clinica import Clinica
+from view.ClinicaView import ClinicaView
 import datetime
 
 
 class ClinicaController:
     def __init__(self, clinicas):
         self.clinicas = clinicas
+        self.view = None
+
+    def abrirTela(self):
+        self.view = ClinicaView(self)
+        self.listar()
 
     def incluir(self):
         try:
-            nome = input("Nome da clinica: ")
-            cidade = input("Cidade: ")
-            descricao = input("Descricao: ")
-            horario_abertura = input("Horario de abertura (HH:MM): ")
-            horario_fechamento = input("Horario de fechamento (HH:MM): ")
+            nome, cidade, descricao, horario_abertura, horario_fechamento = self.view.lerDados()
 
             hora_abertura = datetime.datetime.strptime(horario_abertura, "%H:%M").time()
             hora_fechamento = datetime.datetime.strptime(horario_fechamento, "%H:%M").time()
@@ -20,36 +22,22 @@ class ClinicaController:
             clinica = Clinica(nome, cidade, descricao, hora_abertura, hora_fechamento)
             self.clinicas.append(clinica)
 
-            print("Clinica cadastrada com sucesso.")
+            self.view.mostrarMensagem("Clínica cadastrada com sucesso.")
+            self.view.limparCampos()
+            self.listar()
         except ValueError as e:
-            print("Erro ao cadastrar clinica:", e)
+            self.view.mostrarErro(f"Erro ao cadastrar clínica: {e}")
 
     def listar(self):
-        if len(self.clinicas) == 0:
-            print("Nenhuma clinica cadastrada.")
-            return
-
-        print("\nLista de clinicas:")
-        for i in range(len(self.clinicas)):
-            clinica = self.clinicas[i]
-            print(i, "-", clinica.nome, "-", clinica.cidade, "-", clinica.descricao, "-", clinica.horarioAbertura.strftime("%H:%M"), "-", clinica.horarioFechamento.strftime("%H:%M"))
+        if self.view is not None:
+            self.view.mostrarLista(self.clinicas)
 
     def alterar(self):
-        if len(self.clinicas) == 0:
-            print("Nenhuma clinica cadastrada.")
-            return
-
-        self.listar()
-
         try:
-            indice = int(input("Digite o indice da clinica que deseja alterar: "))
+            indice = self.view.lerIndiceSelecionado()
             clinica = self.clinicas[indice]
 
-            nome = input("Novo nome: ")
-            cidade = input("Nova cidade: ")
-            descricao = input("Nova descricao: ")
-            horario_abertura = input("Novo horario de abertura (HH:MM): ")
-            horario_fechamento = input("Novo horario de fechamento (HH:MM): ")
+            nome, cidade, descricao, horario_abertura, horario_fechamento = self.view.lerDados()
 
             clinica.nome = nome
             clinica.cidade = cidade
@@ -57,20 +45,19 @@ class ClinicaController:
             clinica.horarioAbertura = datetime.datetime.strptime(horario_abertura, "%H:%M").time()
             clinica.horarioFechamento = datetime.datetime.strptime(horario_fechamento, "%H:%M").time()
 
-            print("Clinica alterada com sucesso.")
+            self.view.mostrarMensagem("Clínica alterada com sucesso.")
+            self.view.limparCampos()
+            self.listar()
         except (ValueError, IndexError) as e:
-            print("Erro ao alterar clinica:", e)
+            self.view.mostrarErro(f"Erro ao alterar clínica: {e}")
 
     def excluir(self):
-        if len(self.clinicas) == 0:
-            print("Nenhuma clinica cadastrada.")
-            return
-
-        self.listar()
-
         try:
-            indice = int(input("Digite o indice da clinica que deseja excluir: "))
-            removida = self.clinicas.pop(indice)
-            print("Clinica excluida com sucesso:", removida.nome)
+            indice = self.view.lerIndiceSelecionado()
+            clinica = self.clinicas.pop(indice)
+
+            self.view.mostrarMensagem(f"Clínica excluída com sucesso: {clinica.nome}")
+            self.view.limparCampos()
+            self.listar()
         except (ValueError, IndexError) as e:
-            print("Erro ao excluir clinica:", e)
+            self.view.mostrarErro(f"Erro ao excluir clínica: {e}")

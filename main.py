@@ -4,7 +4,9 @@ from controller.SistemaController import SistemaController
 def main():
     view = SistemaView()
     controller = SistemaController(view)
-    controller.iniciarSistema()
+    view.configurarController(controller)
+    view.mostrarMenuPrincipal()
+    view.iniciar()
 
 if __name__ == "__main__":
     main()

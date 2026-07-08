@@ -1,35 +1,90 @@
+import tkinter as tk
+from tkinter import messagebox
+
+
 class SistemaView:
+    def __init__(self):
+        self.janela = tk.Tk()
+        self.janela.title("Sistema de Atendimento em Clínicas")
+        self.janela.geometry("400x400")
+
+    def iniciar(self):
+        self.janela.mainloop()
+
+    def configurarController(self, controller):
+        self.controller = controller
+
     def mostrarMenuPrincipal(self):
-        print("\n=== SISTEMA DE CLINICAS ===")
-        print("1 - Cadastros")
-        print("2 - Registros")
-        print("3 - Relatórios")
-        print("0 - Sair")
+        titulo = tk.Label(
+            self.janela,
+            text="Sistema de Atendimento em Clínicas",
+            font=("Arial", 14, "bold")
+        )
+        titulo.pack(pady=20)
 
-    def mostrarMenuCadastros(self):
-        print("\n=== CADASTROS ===")
-        print("1 - Clinicas")
-        print("2 - Pacientes")
-        print("3 - Profissionais de Saúde")
-        print("4 - Tipos de Atendimento")
-        print("0 - Voltar")
+        btn_clinicas = tk.Button(
+            self.janela,
+            text="Clínicas",
+            width=25,
+            command=self.controller.menuClinicas
+        )
+        btn_clinicas.pack(pady=5)
 
-    def mostrarMenuRegistros(self):
-        print("\n=== REGISTROS ===")
-        print("1 - Atendimentos")
-        print("2 - Pagamentos")
-        print("0 - Voltar")
+        btn_pacientes = tk.Button(
+            self.janela,
+            text="Pacientes",
+            width=25,
+            command=self.controller.menuPacientes
+        )
+        btn_pacientes.pack(pady=5)
 
-    def mostrarMenuRelatorios(self):
-        print("\n=== RELATÓRIOS ===")
-        print("1 - Clinicas com mais atendimentos")
-        print("2 - Atendimentos mais caros e mais baratos")
-        print("3 - Procedimentos mais realizados")
-        print("4 - Procedimentos mais caros e mais baratos")
-        print("0 - Voltar")
+        btn_profissionais = tk.Button(
+            self.janela,
+            text="Profissionais de Saúde",
+            width=25,
+            command=self.controller.menuProfissionalSaude
+        )
+        btn_profissionais.pack(pady=5)
 
-    def lerOpcao(self):
-        return input("Escolha uma opção: ")
+        btn_tipos = tk.Button(
+            self.janela,
+            text="Tipos de Atendimento",
+            width=25,
+            command=self.controller.menuTipoAtendimento
+        )
+        btn_tipos.pack(pady=5)
+
+        btn_atendimentos = tk.Button(
+            self.janela,
+            text="Atendimentos",
+            width=25,
+            command=self.controller.menuAtendimento
+        )
+        btn_atendimentos.pack(pady=5)
+
+        btn_pagamentos = tk.Button(
+            self.janela,
+            text="Pagamentos",
+            width=25,
+            command=self.controller.menuPagamentos
+        )
+        btn_pagamentos.pack(pady=5)
+
+        btn_relatorios = tk.Button(
+            self.janela,
+            text="Relatórios",
+            width=25,
+            command=self.controller.abrirMenuRelatorios
+        )
+        btn_relatorios.pack(pady=5)
+
+        btn_sair = tk.Button(
+            self.janela,
+            text="Sair",
+            width=25,
+            command=self.janela.destroy
+        )
+        btn_sair.pack(pady=20)
 
     def mostrarMensagem(self, mensagem):
-        print(mensagem)
+        messagebox.showinfo("Mensagem", mensagem)
