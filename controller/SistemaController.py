@@ -4,7 +4,8 @@ from controller.ProfissionalSaudeController import ProfissionalSaudeController
 from controller.TipoAtendimentoController import TipoAtendimentoController
 from controller.AtendimentoController import AtendimentoController
 from controller.PagamentoController import PagamentoController
-import os
+from view.RelatorioView import RelatorioView
+
 
 class SistemaController:
     def __init__(self, view):
@@ -36,51 +37,8 @@ class SistemaController:
             self.atendimentos
         )
         self.pagamentos = self.pagamento_controller.pagamentos
-    
-    def limparTela(self):
-         os.system('cls')
 
-    def iniciarSistema(self):
-        while True:
-            self.limparTela()
-            self.view.mostrarMenuPrincipal()
-            opcao = self.view.lerOpcao()
-
-            if opcao == "1":
-                self.abrirMenuCadastros()
-            elif opcao == "2":
-                self.abrirMenuRegistros()
-            elif opcao == "3":
-                self.abrirMenuRelatorios()
-            elif opcao == "0":
-                self.view.mostrarMensagem("Saindo...")
-                break
-            else:
-                self.view.mostrarMensagem("Opção inválida.")
-
-    def abrirMenuCadastros(self):
-        while True:
-            self.limparTela()
-            print("\n=== CADASTROS ===")
-            print("1 - Clinicas")
-            print("2 - Pacientes")
-            print("3 - Profissionais de Saúde")
-            print("4 - Tipos de Atendimento")
-            print("0 - Voltar")
-            opcao = input("Escolha uma opção: ")
-
-            if opcao == "1":
-                self.menuClinicas()
-            elif opcao == "2":
-                self.menuPacientes()
-            elif opcao == "3":
-                self.menuProfissionalSaude()
-            elif opcao == "4":
-                self.menuTipoAtendimento()
-            elif opcao == "0":
-                break
-            else:
-                print("Opção inválida.")
+        self.relatorio_view = None
 
     def menuClinicas(self):
         self.clinica_controller.abrirTela()
@@ -93,21 +51,6 @@ class SistemaController:
 
     def menuTipoAtendimento(self):
         self.tipo_atendimento_controller.abrirTela()
-    
-    def abrirMenuRegistros(self):
-        while True:
-            self.limparTela()
-            self.view.mostrarMenuRegistros()
-            opcao = self.view.lerOpcao()
-
-            if opcao == "0":
-                break
-            elif opcao == "1":
-                self.menuAtendimento()
-            elif opcao == "2":
-                self.menuPagamentos()
-            else:
-                print("Opção invalida.")
 
     def menuAtendimento(self):
         self.atendimento_controller.abrirTela()
@@ -116,33 +59,17 @@ class SistemaController:
         self.pagamento_controller.abrirTela()
 
     def abrirMenuRelatorios(self):
-        while True:
-            self.limparTela()
-            self.view.mostrarMenuRelatorios()
-            opcao = self.view.lerOpcao()
+        self.relatorio_view = RelatorioView(self)
 
-            if opcao == "0":
-                break
-            elif opcao == "1":
-                self.relatorioClinicasComMaisAtendimentos()
-            elif opcao == "2":
-                self.relatorioAtendimentosMaisCarosEBaratos()
-            elif opcao == "3":
-                self.relatorioProcedimentosMaisRealizados()
-            elif opcao == "4":
-                self.relatorioProcedimentosMaisCarosEBaratos()
-            else:
-                self.view.mostrarMensagem("Opção inválida.")
-    
     def relatorioClinicasComMaisAtendimentos(self):
         if len(self.atendimentos) == 0:
-            print("Nenhum atendimento cadastrado.")
-            return
+            return "Nenhum atendimento cadastrado."
 
         contagem = {}
 
         for atendimento in self.atendimentos:
             nome_clinica = atendimento.clinica.nome
+
             if nome_clinica in contagem:
                 contagem[nome_clinica] += 1
             else:
@@ -150,15 +77,17 @@ class SistemaController:
 
         maior = max(contagem.values())
 
-        print("\n=== CLINICAS COM MAIS ATENDIMENTOS ===")
+        resultado = "=== CLINICAS COM MAIS ATENDIMENTOS ===\n\n"
+
         for clinica, quantidade in contagem.items():
             if quantidade == maior:
-                print(clinica, "-", quantidade, "atendimentos")
-    
+                resultado += f"{clinica} - {quantidade} atendimento(s)\n"
+
+        return resultado
+
     def relatorioAtendimentosMaisCarosEBaratos(self):
         if len(self.atendimentos) == 0:
-            print("Nenhum atendimento cadastrado.")
-            return
+            return "Nenhum atendimento cadastrado."
 
         mais_caro = self.atendimentos[0]
         mais_barato = self.atendimentos[0]
@@ -166,47 +95,62 @@ class SistemaController:
         for atendimento in self.atendimentos:
             if atendimento.valor > mais_caro.valor:
                 mais_caro = atendimento
+
             if atendimento.valor < mais_barato.valor:
                 mais_barato = atendimento
 
-        print("\n=== ATENDIMENTO MAIS CARO ===")
-        print(mais_caro.paciente.nome, "-", mais_caro.clinica.nome, "-", mais_caro.valor)
+        resultado = "=== ATENDIMENTO MAIS CARO ===\n\n"
+        resultado += f"Paciente: {mais_caro.paciente.nome}\n"
+        resultado += f"Clinica: {mais_caro.clinica.nome}\n"
+        resultado += f"Data: {mais_caro.data.strftime('%d/%m/%Y')}\n"
+        resultado += f"Valor: R$ {mais_caro.valor:.2f}\n\n"
 
-        print("\n=== ATENDIMENTO MAIS BARATO ===")
-        print(mais_barato.paciente.nome, "-", mais_barato.clinica.nome, "-", mais_barato.valor)
-    
+        resultado += "=== ATENDIMENTO MAIS BARATO ===\n\n"
+        resultado += f"Paciente: {mais_barato.paciente.nome}\n"
+        resultado += f"Clinica: {mais_barato.clinica.nome}\n"
+        resultado += f"Data: {mais_barato.data.strftime('%d/%m/%Y')}\n"
+        resultado += f"Valor: R$ {mais_barato.valor:.2f}\n"
+
+        return resultado
+
     def relatorioProcedimentosMaisRealizados(self):
         contagem = {}
 
         for atendimento in self.atendimentos:
-            for procedimento in atendimento.procedimentos:
+            procedimentos = getattr(atendimento, "procedimentos", [])
+
+            for procedimento in procedimentos:
                 descricao = procedimento.descricao
+
                 if descricao in contagem:
                     contagem[descricao] += 1
                 else:
                     contagem[descricao] = 1
 
         if len(contagem) == 0:
-            print("Nenhum procedimento cadastrado.")
-            return
+            return "Nenhum procedimento cadastrado."
 
         maior = max(contagem.values())
 
-        print("\n=== PROCEDIMENTOS MAIS REALIZADOS ===")
+        resultado = "=== PROCEDIMENTOS MAIS REALIZADOS ===\n\n"
+
         for descricao, quantidade in contagem.items():
             if quantidade == maior:
-                print(descricao, "-", quantidade, "vezes")
-        
+                resultado += f"{descricao} - {quantidade} vez(es)\n"
+
+        return resultado
+
     def relatorioProcedimentosMaisCarosEBaratos(self):
         procedimentos = []
 
         for atendimento in self.atendimentos:
-            for procedimento in atendimento.procedimentos:
+            procedimentos_atendimento = getattr(atendimento, "procedimentos", [])
+
+            for procedimento in procedimentos_atendimento:
                 procedimentos.append(procedimento)
 
         if len(procedimentos) == 0:
-            print("Nenhum procedimento cadastrado.")
-            return
+            return "Nenhum procedimento cadastrado."
 
         mais_caro = procedimentos[0]
         mais_barato = procedimentos[0]
@@ -214,12 +158,16 @@ class SistemaController:
         for procedimento in procedimentos:
             if procedimento.custo > mais_caro.custo:
                 mais_caro = procedimento
+
             if procedimento.custo < mais_barato.custo:
                 mais_barato = procedimento
 
-        print("\n=== PROCEDIMENTO MAIS CARO ===")
-        print(mais_caro.descricao, "-", mais_caro.custo)
+        resultado = "=== PROCEDIMENTO MAIS CARO ===\n\n"
+        resultado += f"Descricao: {mais_caro.descricao}\n"
+        resultado += f"Custo: R$ {mais_caro.custo:.2f}\n\n"
 
-        print("\n=== PROCEDIMENTO MAIS BARATO ===")
-        print(mais_barato.descricao, "-", mais_barato.custo)
-            
+        resultado += "=== PROCEDIMENTO MAIS BARATO ===\n\n"
+        resultado += f"Descricao: {mais_barato.descricao}\n"
+        resultado += f"Custo: R$ {mais_barato.custo:.2f}\n"
+
+        return resultado
