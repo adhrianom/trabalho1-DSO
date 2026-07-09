@@ -1,11 +1,13 @@
 from model.Clinica import Clinica
 from view.ClinicaView import ClinicaView
+from dao.ClinicaDAO import ClinicaDAO
 import datetime
 
 
 class ClinicaController:
-    def __init__(self, clinicas):
-        self.clinicas = clinicas
+    def __init__(self, clinicas=None):
+        self.dao = ClinicaDAO()
+        self.clinicas = self.dao.carregar()
         self.view = None
 
     def abrirTela(self):
@@ -21,6 +23,7 @@ class ClinicaController:
 
             clinica = Clinica(nome, cidade, descricao, hora_abertura, hora_fechamento)
             self.clinicas.append(clinica)
+            self.dao.salvar(self.clinicas)
 
             self.view.mostrarMensagem("Clínica cadastrada com sucesso.")
             self.view.limparCampos()
@@ -45,6 +48,8 @@ class ClinicaController:
             clinica.horarioAbertura = datetime.datetime.strptime(horario_abertura, "%H:%M").time()
             clinica.horarioFechamento = datetime.datetime.strptime(horario_fechamento, "%H:%M").time()
 
+            self.dao.salvar(self.clinicas)
+
             self.view.mostrarMensagem("Clínica alterada com sucesso.")
             self.view.limparCampos()
             self.listar()
@@ -55,6 +60,7 @@ class ClinicaController:
         try:
             indice = self.view.lerIndiceSelecionado()
             clinica = self.clinicas.pop(indice)
+            self.dao.salvar(self.clinicas)
 
             self.view.mostrarMensagem(f"Clínica excluída com sucesso: {clinica.nome}")
             self.view.limparCampos()

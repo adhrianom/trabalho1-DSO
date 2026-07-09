@@ -1,11 +1,13 @@
 from model.Paciente import Paciente
 from view.PacienteView import PacienteView
+from dao.PacienteDAO import PacienteDAO
 import datetime
 
 
 class PacienteController:
-    def __init__(self, pacientes):
-        self.pacientes = pacientes
+    def __init__(self, pacientes=None):
+        self.dao = PacienteDAO()
+        self.pacientes = self.dao.carregar()
         self.view = None
 
     def abrirTela(self):
@@ -19,6 +21,7 @@ class PacienteController:
 
             paciente = Paciente(nome, celular, cpf, data_nascimento)
             self.pacientes.append(paciente)
+            self.dao.salvar(self.pacientes)
 
             self.view.mostrarMensagem("Paciente cadastrado com sucesso.")
             self.view.limparCampos()
@@ -42,6 +45,8 @@ class PacienteController:
             paciente.cpf = cpf
             paciente.dataNascimento = datetime.datetime.strptime(data_str, "%d/%m/%Y").date()
 
+            self.dao.salvar(self.pacientes)
+
             self.view.mostrarMensagem("Paciente alterado com sucesso.")
             self.view.limparCampos()
             self.listar()
@@ -52,8 +57,9 @@ class PacienteController:
         try:
             indice = self.view.lerIndiceSelecionado()
             paciente = self.pacientes.pop(indice)
+            self.dao.salvar(self.pacientes)
 
-            self.view.mostrarMensagem(f"Paciente excluído com sucesso: {paciente.nome}")
+            self.view.mostrarMensagem(f"Paciente excluÃ­do com sucesso: {paciente.nome}")
             self.view.limparCampos()
             self.listar()
         except (ValueError, IndexError) as e:

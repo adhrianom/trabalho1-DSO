@@ -1,10 +1,12 @@
 from model.ProfissionalSaude import ProfissionalSaude
 from view.ProfissionalSaudeView import ProfissionalSaudeView
+from dao.ProfissionalSaudeDAO import ProfissionalSaudeDAO
 
 
 class ProfissionalSaudeController:
-    def __init__(self, profissionais):
-        self.profissionais = profissionais
+    def __init__(self, profissionais=None):
+        self.dao = ProfissionalSaudeDAO()
+        self.profissionais = self.dao.carregar()
         self.view = None
 
     def abrirTela(self):
@@ -17,6 +19,7 @@ class ProfissionalSaudeController:
 
             profissional = ProfissionalSaude(nome, celular, cpf, especialidade, registro)
             self.profissionais.append(profissional)
+            self.dao.salvar(self.profissionais)
 
             self.view.mostrarMensagem("Profissional cadastrado com sucesso.")
             self.view.limparCampos()
@@ -41,6 +44,8 @@ class ProfissionalSaudeController:
             profissional.especialidade = especialidade
             profissional.registroProfissional = registro
 
+            self.dao.salvar(self.profissionais)
+
             self.view.mostrarMensagem("Profissional alterado com sucesso.")
             self.view.limparCampos()
             self.listar()
@@ -51,8 +56,9 @@ class ProfissionalSaudeController:
         try:
             indice = self.view.lerIndiceSelecionado()
             profissional = self.profissionais.pop(indice)
+            self.dao.salvar(self.profissionais)
 
-            self.view.mostrarMensagem(f"Profissional excluído com sucesso: {profissional.nome}")
+            self.view.mostrarMensagem(f"Profissional excluÃ­do com sucesso: {profissional.nome}")
             self.view.limparCampos()
             self.listar()
         except (ValueError, IndexError) as e:

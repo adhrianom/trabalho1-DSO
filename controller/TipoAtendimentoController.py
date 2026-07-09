@@ -1,10 +1,12 @@
 from model.TipoAtendimento import TipoAtendimento
 from view.TipoAtendimentoView import TipoAtendimentoView
+from dao.TipoAtendimentoDAO import TipoAtendimentoDAO
 
 
 class TipoAtendimentoController:
-    def __init__(self, tipos_atendimento):
-        self.tipos_atendimento = tipos_atendimento
+    def __init__(self, tipos_atendimento=None):
+        self.dao = TipoAtendimentoDAO()
+        self.tipos_atendimento = self.dao.carregar()
         self.view = None
 
     def abrirTela(self):
@@ -17,6 +19,7 @@ class TipoAtendimentoController:
 
             tipo = TipoAtendimento(descricao)
             self.tipos_atendimento.append(tipo)
+            self.dao.salvar(self.tipos_atendimento)
 
             self.view.mostrarMensagem("Tipo de atendimento cadastrado com sucesso.")
             self.view.limparCampos()
@@ -36,6 +39,8 @@ class TipoAtendimentoController:
             descricao = self.view.lerDados()
             tipo.descricao = descricao
 
+            self.dao.salvar(self.tipos_atendimento)
+
             self.view.mostrarMensagem("Tipo de atendimento alterado com sucesso.")
             self.view.limparCampos()
             self.listar()
@@ -46,8 +51,9 @@ class TipoAtendimentoController:
         try:
             indice = self.view.lerIndiceSelecionado()
             tipo = self.tipos_atendimento.pop(indice)
+            self.dao.salvar(self.tipos_atendimento)
 
-            self.view.mostrarMensagem(f"Tipo de atendimento excluído com sucesso: {tipo.descricao}")
+            self.view.mostrarMensagem(f"Tipo de atendimento excluÃ­do com sucesso: {tipo.descricao}")
             self.view.limparCampos()
             self.listar()
         except (ValueError, IndexError) as e:
