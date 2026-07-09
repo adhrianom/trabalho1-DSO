@@ -1,71 +1,60 @@
 from model.Paciente import Paciente
+from view.PacienteView import PacienteView
 import datetime
 
 
 class PacienteController:
     def __init__(self, pacientes):
         self.pacientes = pacientes
+        self.view = None
+
+    def abrirTela(self):
+        self.view = PacienteView(self)
+        self.listar()
 
     def incluir(self):
         try:
-            nome = input("Nome do paciente: ")
-            celular = input("Celular: ")
-            cpf = input("CPF: ")
-            data_str = input("Data de nascimento (DD/MM/YYYY): ")
-            dataNascimento = datetime.datetime.strptime(data_str, "%d/%m/%Y").date()
+            nome, celular, cpf, data_str = self.view.lerDados()
+            data_nascimento = datetime.datetime.strptime(data_str, "%d/%m/%Y").date()
 
-            paciente = Paciente(nome, celular, cpf, dataNascimento)
+            paciente = Paciente(nome, celular, cpf, data_nascimento)
             self.pacientes.append(paciente)
 
-            print("Paciente cadastrado com sucesso.")
+            self.view.mostrarMensagem("Paciente cadastrado com sucesso.")
+            self.view.limparCampos()
+            self.listar()
         except ValueError as e:
-            print("Erro ao cadastrar paciente:", e)
+            self.view.mostrarErro(f"Erro ao cadastrar paciente: {e}")
 
     def listar(self):
-        if len(self.pacientes) == 0:
-            print("Nenhum paciente cadastrado.")
-            return
-
-        print("\nLista de pacientes:")
-        for i in range(len(self.pacientes)):
-            paciente = self.pacientes[i]
-            print(i, "-", paciente.nome, "-", paciente.celular, "-", paciente.cpf, "-", paciente.dataNascimento.strftime("%d/%m/%Y"))
+        if self.view is not None:
+            self.view.mostrarLista(self.pacientes)
 
     def alterar(self):
-        if len(self.pacientes) == 0:
-            print("Nenhum paciente cadastrado.")
-            return
-
-        self.listar()
-
         try:
-            indice = int(input("Digite o indice do paciente que deseja alterar: "))
+            indice = self.view.lerIndiceSelecionado()
             paciente = self.pacientes[indice]
 
-            nome = input("Novo nome: ")
-            celular = input("Novo celular: ")
-            cpf = input("Novo CPF: ")
-            data_str = input("Nova data de nascimento (DD/MM/YYYY): ")
+            nome, celular, cpf, data_str = self.view.lerDados()
 
             paciente.nome = nome
             paciente.celular = celular
             paciente.cpf = cpf
             paciente.dataNascimento = datetime.datetime.strptime(data_str, "%d/%m/%Y").date()
 
-            print("Paciente alterado com sucesso.")
+            self.view.mostrarMensagem("Paciente alterado com sucesso.")
+            self.view.limparCampos()
+            self.listar()
         except (ValueError, IndexError) as e:
-            print("Erro ao alterar paciente:", e)
+            self.view.mostrarErro(f"Erro ao alterar paciente: {e}")
 
     def excluir(self):
-        if len(self.pacientes) == 0:
-            print("Nenhum paciente cadastrado.")
-            return
-
-        self.listar()
-
         try:
-            indice = int(input("Digite o indice do paciente que deseja excluir: "))
-            removido = self.pacientes.pop(indice)
-            print("Paciente excluido com sucesso:", removido.nome)
+            indice = self.view.lerIndiceSelecionado()
+            paciente = self.pacientes.pop(indice)
+
+            self.view.mostrarMensagem(f"Paciente excluído com sucesso: {paciente.nome}")
+            self.view.limparCampos()
+            self.listar()
         except (ValueError, IndexError) as e:
-            print("Erro ao excluir paciente:", e)
+            self.view.mostrarErro(f"Erro ao excluir paciente: {e}")
