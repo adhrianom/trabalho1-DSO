@@ -110,54 +110,10 @@ class SistemaController:
                 print("Opção invalida.")
 
     def menuAtendimento(self):
-        while True:
-            print("\n=== MENU ATENDIMENTO ===")
-            print("1 - Incluir")
-            print("2 - Listar")
-            print("3 - Alterar")
-            print("4 - Excluir")
-            print("5 - Adicionar Procedimento")
-            print("0 - Voltar")
+        self.atendimento_controller.abrirTela()
 
-            opcao = input("Escolha uma opção: ")
-
-            if opcao == "1":
-                    self.atendimento_controller.incluir()
-            elif opcao == "2":
-                    self.atendimento_controller.listar()
-            elif opcao == "3":
-                    self.atendimento_controller.alterar()
-            elif opcao == "4":
-                    self.atendimento_controller.excluir()
-            elif opcao == "5":
-                    self.atendimento_controller.adicionarProcedimento()
-            elif opcao == "0":
-                    break
-            else:
-                    print("Opção invalida.")
     def menuPagamentos(self):
-        while True:
-            print("\n=== MENU PAGAMENTOS ===")
-            print("1 - Incluir")
-            print("2 - Listar")
-            print("3 - Alterar")
-            print("4 - Excluir")
-            print("0 - Voltar")
-
-            opcao = input("Escolha uma opção: ")
-
-            if opcao == "1":
-                    self.pagamento_controller.incluir()
-            elif opcao == "2":
-                    self.pagamento_controller.listar()
-            elif opcao == "3":
-                    self.pagamento_controller.alterar()
-            elif opcao == "4":
-                    self.pagamento_controller.excluir()
-            elif opcao == "0":
-                    break
-            else:
-                    print("Opção inválida.")
+        self.pagamento_controller.abrirTela()
 
     def abrirMenuRelatorios(self):
         while True:

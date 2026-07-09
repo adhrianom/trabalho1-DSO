@@ -1,5 +1,6 @@
 from model.Atendimento import Atendimento
 from model.Procedimento import Procedimento
+from view.AtendimentoView import AtendimentoView
 from dao.AtendimentoDAO import AtendimentoDAO
 import datetime
 
@@ -12,39 +13,35 @@ class AtendimentoController:
         self.pacientes = pacientes
         self.profissionais = profissionais
         self.tipos_atendimento = tipos_atendimento
+        self.view = None
+
+    def abrirTela(self):
+        self.view = AtendimentoView(self)
+        self.view.atualizarCombos(
+            self.clinicas,
+            self.pacientes,
+            self.profissionais,
+            self.tipos_atendimento
+        )
+        self.listar()
 
     def incluir(self):
         if len(self.clinicas) == 0 or len(self.pacientes) == 0 or len(self.profissionais) == 0 or len(self.tipos_atendimento) == 0:
-            print("É preciso ter clínica, paciente, profissional e tipo de atendimento cadastrados.")
+            self.view.mostrarErro("É preciso ter clínica, paciente, profissional e tipo de atendimento cadastrados.")
             return
 
         try:
-            print("\nClínicas:")
-            for i in range(len(self.clinicas)):
-                print(i, "-", self.clinicas[i].nome)
-            indice_clinica = int(input("Escolha a clínica: "))
+            indice_clinica, indice_paciente, indice_profissional, indice_tipo, data_str, hora_inicio_str, hora_fim_str, valor_str = self.view.lerDados()
+
+            if indice_clinica < 0 or indice_paciente < 0 or indice_profissional < 0 or indice_tipo < 0:
+                raise ValueError("Selecione clínica, paciente, profissional e tipo de atendimento.")
+
             clinica = self.clinicas[indice_clinica]
-
-            print("\nPacientes:")
-            for i in range(len(self.pacientes)):
-                print(i, "-", self.pacientes[i].nome)
-            indice_paciente = int(input("Escolha o paciente: "))
             paciente = self.pacientes[indice_paciente]
-
-            print("\nProfissionais de Saúde:")
-            for i in range(len(self.profissionais)):
-                print(i, "-", self.profissionais[i].nome)
-            indice_profissional = int(input("Escolha o profissional de saúde: "))
             profissional_saude = self.profissionais[indice_profissional]
-
-            print("\nTipos de Atendimento:")
-            for i in range(len(self.tipos_atendimento)):
-                print(i, "-", self.tipos_atendimento[i].descricao)
-            indice_tipo = int(input("Escolha o tipo de atendimento: "))
             tipo_atendimento = self.tipos_atendimento[indice_tipo]
 
-            data = input("Data (dd/mm/yyyy): ")
-            data = datetime.datetime.strptime(data, "%d/%m/%Y").date()
+            data = datetime.datetime.strptime(data_str, "%d/%m/%Y").date()
 
             idade = data.year - paciente.dataNascimento.year
             if (data.month, data.day) < (paciente.dataNascimento.month, paciente.dataNascimento.day):
@@ -53,11 +50,8 @@ class AtendimentoController:
             if idade <= 18:
                 raise ValueError("O paciente deve ter mais de 18 anos para realizar atendimento de forma independente.")
 
-            hora_inicio = input("Hora de início (hh:mm): ")
-            hora_inicio = datetime.datetime.strptime(hora_inicio, "%H:%M").time()
-
-            hora_fim = input("Hora de fim (hh:mm): ")
-            hora_fim = datetime.datetime.strptime(hora_fim, "%H:%M").time()
+            hora_inicio = datetime.datetime.strptime(hora_inicio_str, "%H:%M").time()
+            hora_fim = datetime.datetime.strptime(hora_fim_str, "%H:%M").time()
 
             if hora_inicio >= hora_fim:
                 raise ValueError("A hora de início deve ser menor que a hora de fim.")
@@ -65,7 +59,7 @@ class AtendimentoController:
             if hora_inicio < clinica.horarioAbertura or hora_fim > clinica.horarioFechamento:
                 raise ValueError("O atendimento deve estar dentro do horário de funcionamento da clínica.")
 
-            valor = float(input("Valor: "))
+            valor = float(valor_str)
 
             atendimento = Atendimento(
                 clinica,
@@ -81,67 +75,32 @@ class AtendimentoController:
             self.atendimentos.append(atendimento)
             self.dao.salvar(self.atendimentos)
 
-            print("Atendimento cadastrado com sucesso.")
+            self.view.mostrarMensagem("Atendimento cadastrado com sucesso.")
+            self.view.limparCampos()
+            self.listar()
         except (ValueError, IndexError) as e:
-            print("Erro ao cadastrar atendimento:", e)
+            self.view.mostrarErro(f"Erro ao cadastrar atendimento: {e}")
 
     def listar(self):
-        if len(self.atendimentos) == 0:
-            print("Nenhum atendimento cadastrado.")
-            return
-
-        print("\nLista de atendimentos:")
-        for i in range(len(self.atendimentos)):
-            atendimento = self.atendimentos[i]
-            print(
-                i, "-",
-                atendimento.clinica.nome, "|",
-                atendimento.paciente.nome, "|",
-                atendimento.profissionalSaude.nome, "|",
-                atendimento.tipoAtendimento.descricao, "|",
-                atendimento.data, "|",
-                atendimento.horaInicio, "|",
-                atendimento.horaFim, "|",
-                atendimento.valor
-            )
+        if self.view is not None:
+            self.view.mostrarLista(self.atendimentos)
 
     def alterar(self):
-        if len(self.atendimentos) == 0:
-            print("Nenhum atendimento cadastrado.")
-            return
-
-        self.listar()
-
         try:
-            indice = int(input("Digite o índice do atendimento que deseja alterar: "))
+            indice = self.view.lerIndiceSelecionado()
             atendimento = self.atendimentos[indice]
 
-            print("\nClínicas:")
-            for i in range(len(self.clinicas)):
-                print(i, "-", self.clinicas[i].nome)
-            indice_clinica = int(input("Escolha a clínica: "))
+            indice_clinica, indice_paciente, indice_profissional, indice_tipo, data_str, hora_inicio_str, hora_fim_str, valor_str = self.view.lerDados()
+
+            if indice_clinica < 0 or indice_paciente < 0 or indice_profissional < 0 or indice_tipo < 0:
+                raise ValueError("Selecione clínica, paciente, profissional e tipo de atendimento.")
+
             clinica = self.clinicas[indice_clinica]
-
-            print("\nPacientes:")
-            for i in range(len(self.pacientes)):
-                print(i, "-", self.pacientes[i].nome)
-            indice_paciente = int(input("Escolha o paciente: "))
             paciente = self.pacientes[indice_paciente]
-
-            print("\nProfissionais de Saúde:")
-            for i in range(len(self.profissionais)):
-                print(i, "-", self.profissionais[i].nome)
-            indice_profissional = int(input("Escolha o profissional de saúde: "))
             profissional_saude = self.profissionais[indice_profissional]
-
-            print("\nTipos de Atendimento:")
-            for i in range(len(self.tipos_atendimento)):
-                print(i, "-", self.tipos_atendimento[i].descricao)
-            indice_tipo = int(input("Escolha o tipo de atendimento: "))
             tipo_atendimento = self.tipos_atendimento[indice_tipo]
 
-            data = input("Nova data (dd/mm/yyyy): ")
-            data = datetime.datetime.strptime(data, "%d/%m/%Y").date()
+            data = datetime.datetime.strptime(data_str, "%d/%m/%Y").date()
 
             idade = data.year - paciente.dataNascimento.year
             if (data.month, data.day) < (paciente.dataNascimento.month, paciente.dataNascimento.day):
@@ -150,11 +109,8 @@ class AtendimentoController:
             if idade <= 18:
                 raise ValueError("O paciente deve ter mais de 18 anos para realizar atendimento de forma independente.")
 
-            hora_inicio = input("Nova hora de início (hh:mm): ")
-            hora_inicio = datetime.datetime.strptime(hora_inicio, "%H:%M").time()
-
-            hora_fim = input("Nova hora de fim (hh:mm): ")
-            hora_fim = datetime.datetime.strptime(hora_fim, "%H:%M").time()
+            hora_inicio = datetime.datetime.strptime(hora_inicio_str, "%H:%M").time()
+            hora_fim = datetime.datetime.strptime(hora_fim_str, "%H:%M").time()
 
             if hora_inicio >= hora_fim:
                 raise ValueError("A hora de início deve ser menor que a hora de fim.")
@@ -162,7 +118,7 @@ class AtendimentoController:
             if hora_inicio < clinica.horarioAbertura or hora_fim > clinica.horarioFechamento:
                 raise ValueError("O atendimento deve estar dentro do horário de funcionamento da clínica.")
 
-            valor = float(input("Novo valor: "))
+            valor = float(valor_str)
 
             atendimento.clinica = clinica
             atendimento.paciente = paciente
@@ -175,40 +131,31 @@ class AtendimentoController:
 
             self.dao.salvar(self.atendimentos)
 
-            print("Atendimento alterado com sucesso.")
+            self.view.mostrarMensagem("Atendimento alterado com sucesso.")
+            self.view.limparCampos()
+            self.listar()
         except (ValueError, IndexError) as e:
-            print("Erro ao alterar atendimento:", e)
+            self.view.mostrarErro(f"Erro ao alterar atendimento: {e}")
 
     def excluir(self):
-        if len(self.atendimentos) == 0:
-            print("Nenhum atendimento cadastrado.")
-            return
-
-        self.listar()
-
         try:
-            indice = int(input("Digite o índice do atendimento que deseja excluir: "))
-            removido = self.atendimentos.pop(indice)
+            indice = self.view.lerIndiceSelecionado()
+            atendimento = self.atendimentos.pop(indice)
+
             self.dao.salvar(self.atendimentos)
 
-            print("Atendimento excluído com sucesso:", removido.clinica.nome, "-", removido.paciente.nome)
+            self.view.mostrarMensagem(f"Atendimento excluído com sucesso: {atendimento.paciente.nome}")
+            self.view.limparCampos()
+            self.listar()
         except (ValueError, IndexError) as e:
-            print("Erro ao excluir atendimento:", e)
+            self.view.mostrarErro(f"Erro ao excluir atendimento: {e}")
 
     def adicionarProcedimento(self):
-        if len(self.atendimentos) == 0:
-            print("Nenhum atendimento cadastrado.")
-            return
-
-        self.listar()
-
         try:
-            indice_atendimento = int(input("Escolha o atendimento: "))
+            indice_atendimento, descricao, custo_str = self.view.lerDadosProcedimento()
             atendimento = self.atendimentos[indice_atendimento]
 
-            descricao = input("Descrição do procedimento: ")
-            custo = float(input("Custo do procedimento: "))
-
+            custo = float(custo_str)
             procedimento = Procedimento(descricao, custo)
 
             if not hasattr(atendimento, "procedimentos"):
@@ -217,6 +164,8 @@ class AtendimentoController:
             atendimento.procedimentos.append(procedimento)
             self.dao.salvar(self.atendimentos)
 
-            print("Procedimento adicionado com sucesso.")
+            self.view.mostrarMensagem("Procedimento adicionado com sucesso.")
+            self.view.limparCampos()
+            self.listar()
         except (ValueError, IndexError) as e:
-            print("Erro ao adicionar procedimento:", e)
+            self.view.mostrarErro(f"Erro ao adicionar procedimento: {e}")
