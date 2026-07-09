@@ -2,11 +2,13 @@ import datetime
 from model.PagamentoDinheiro import PagamentoDinheiro
 from model.PagamentoPix import PagamentoPix
 from model.PagamentoCartaoCredito import PagamentoCartaoCredito
+from dao.PagamentoDAO import PagamentoDAO
 
 
 class PagamentoController:
     def __init__(self, pagamentos, atendimentos):
-        self.pagamentos = pagamentos
+        self.dao = PagamentoDAO()
+        self.pagamentos = self.dao.carregar()
         self.atendimentos = atendimentos
 
     def incluir(self):
@@ -35,33 +37,31 @@ class PagamentoController:
             print("1 - Dinheiro")
             print("2 - PIX")
             print("3 - Cartao de credito")
-            tipo = input("Escolha uma opção: ")
+            tipo = input("Escolha uma opcao: ")
 
             if tipo == "1":
                 pagamento = PagamentoDinheiro(data, valor_pago)
-
             elif tipo == "2":
                 cpf_pagador = input("CPF do pagador: ")
                 pagamento = PagamentoPix(cpf_pagador, data, valor_pago)
-
             elif tipo == "3":
                 numero_cartao = input("Numero do cartao: ")
                 bandeira = input("Bandeira: ")
                 pagamento = PagamentoCartaoCredito(numero_cartao, bandeira, data, valor_pago)
-
             else:
-                print("Opção invalida.")
+                print("Opcao invalida.")
                 return
-            
-            if valor_pago < atendimento.valor:
-                raise ValueError("O valor do pagamento deve ser igual ao valor do atendimento.")
-            
-            else:
-                self.pagamentos.append(pagamento)
-                atendimento.pagamentos.append(pagamento)
 
-                print("Pagamento cadastrado com sucesso.")
+            self.pagamentos.append(pagamento)
 
+            if not hasattr(atendimento, "pagamentos"):
+                atendimento.pagamentos = []
+
+            atendimento.pagamentos.append(pagamento)
+
+            self.dao.salvar(self.pagamentos)
+
+            print("Pagamento cadastrado com sucesso.")
         except (ValueError, IndexError) as e:
             print("Erro ao cadastrar pagamento:", e)
 
@@ -113,23 +113,27 @@ class PagamentoController:
 
             if tipo == "1":
                 novo_pagamento = PagamentoDinheiro(data, valor_pago)
-
             elif tipo == "2":
                 cpf_pagador = input("CPF do pagador: ")
                 novo_pagamento = PagamentoPix(cpf_pagador, data, valor_pago)
-
             elif tipo == "3":
                 numero_cartao = input("Numero do cartao: ")
                 bandeira = input("Bandeira: ")
                 novo_pagamento = PagamentoCartaoCredito(numero_cartao, bandeira, data, valor_pago)
-
             else:
                 print("Opcao invalida.")
                 return
 
             self.pagamentos[indice_pagamento] = novo_pagamento
-            print("Pagamento alterado com sucesso.")
 
+            if not hasattr(atendimento, "pagamentos"):
+                atendimento.pagamentos = []
+
+            atendimento.pagamentos.append(novo_pagamento)
+
+            self.dao.salvar(self.pagamentos)
+
+            print("Pagamento alterado com sucesso.")
         except (ValueError, IndexError) as e:
             print("Erro ao alterar pagamento:", e)
 
@@ -143,6 +147,8 @@ class PagamentoController:
         try:
             indice = int(input("Digite o indice do pagamento que deseja excluir: "))
             removido = self.pagamentos.pop(indice)
+            self.dao.salvar(self.pagamentos)
+
             print("Pagamento excluido com sucesso:", removido.data, "-", removido.valorPago)
         except (ValueError, IndexError) as e:
             print("Erro ao excluir pagamento:", e)

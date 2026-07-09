@@ -22,20 +22,20 @@ class SistemaController:
         self.tipo_atendimento_controller = TipoAtendimentoController()
         self.tipos_atendimento = self.tipo_atendimento_controller.tipos_atendimento
 
-        self.atendimentos = []
         self.atendimento_controller = AtendimentoController(
-            self.atendimentos,
+            [],
             self.clinicas,
             self.pacientes,
             self.profissionais,
             self.tipos_atendimento
         )
+        self.atendimentos = self.atendimento_controller.atendimentos
 
-        self.pagamentos = []
         self.pagamento_controller = PagamentoController(
-            self.pagamentos,
+            [],
             self.atendimentos
         )
+        self.pagamentos = self.pagamento_controller.pagamentos
     
     def limparTela(self):
          os.system('cls')

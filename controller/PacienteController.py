@@ -59,7 +59,7 @@ class PacienteController:
             paciente = self.pacientes.pop(indice)
             self.dao.salvar(self.pacientes)
 
-            self.view.mostrarMensagem(f"Paciente excluÃ­do com sucesso: {paciente.nome}")
+            self.view.mostrarMensagem(f"Paciente excluído com sucesso: {paciente.nome}")
             self.view.limparCampos()
             self.listar()
         except (ValueError, IndexError) as e:

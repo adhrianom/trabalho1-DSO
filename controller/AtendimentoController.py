@@ -1,11 +1,13 @@
 from model.Atendimento import Atendimento
 from model.Procedimento import Procedimento
+from dao.AtendimentoDAO import AtendimentoDAO
 import datetime
 
 
 class AtendimentoController:
     def __init__(self, atendimentos, clinicas, pacientes, profissionais, tipos_atendimento):
-        self.atendimentos = atendimentos
+        self.dao = AtendimentoDAO()
+        self.atendimentos = self.dao.carregar()
         self.clinicas = clinicas
         self.pacientes = pacientes
         self.profissionais = profissionais
@@ -19,7 +21,7 @@ class AtendimentoController:
         try:
             print("\nClínicas:")
             for i in range(len(self.clinicas)):
-                print(i, "-", self.clinicas[i].nome, " (Abertura:", self.clinicas[i].horarioAbertura, "- Fechamento:", self.clinicas[i].horarioFechamento, ")")
+                print(i, "-", self.clinicas[i].nome)
             indice_clinica = int(input("Escolha a clínica: "))
             clinica = self.clinicas[indice_clinica]
 
@@ -58,10 +60,10 @@ class AtendimentoController:
             hora_fim = datetime.datetime.strptime(hora_fim, "%H:%M").time()
 
             if hora_inicio >= hora_fim:
-                raise ValueError(f"A hora de início deve ser menor que a hora de fim.")
+                raise ValueError("A hora de início deve ser menor que a hora de fim.")
 
             if hora_inicio < clinica.horarioAbertura or hora_fim > clinica.horarioFechamento:
-                raise ValueError(f"O atendimento deve estar dentro do horário de funcionamento da clínica.\nAbertura: {clinica.horarioAbertura} - Fechamento: {clinica.horarioFechamento}")
+                raise ValueError("O atendimento deve estar dentro do horário de funcionamento da clínica.")
 
             valor = float(input("Valor: "))
 
@@ -75,7 +77,9 @@ class AtendimentoController:
                 hora_fim,
                 valor
             )
+
             self.atendimentos.append(atendimento)
+            self.dao.salvar(self.atendimentos)
 
             print("Atendimento cadastrado com sucesso.")
         except (ValueError, IndexError) as e:
@@ -114,7 +118,7 @@ class AtendimentoController:
 
             print("\nClínicas:")
             for i in range(len(self.clinicas)):
-                print(i, "-", self.clinicas[i].nome, " (Abertura:", self.clinicas[i].horarioAbertura, "- Fechamento:", self.clinicas[i].horarioFechamento, ")")
+                print(i, "-", self.clinicas[i].nome)
             indice_clinica = int(input("Escolha a clínica: "))
             clinica = self.clinicas[indice_clinica]
 
@@ -169,6 +173,8 @@ class AtendimentoController:
             atendimento.horaFim = hora_fim
             atendimento.valor = valor
 
+            self.dao.salvar(self.atendimentos)
+
             print("Atendimento alterado com sucesso.")
         except (ValueError, IndexError) as e:
             print("Erro ao alterar atendimento:", e)
@@ -183,6 +189,8 @@ class AtendimentoController:
         try:
             indice = int(input("Digite o índice do atendimento que deseja excluir: "))
             removido = self.atendimentos.pop(indice)
+            self.dao.salvar(self.atendimentos)
+
             print("Atendimento excluído com sucesso:", removido.clinica.nome, "-", removido.paciente.nome)
         except (ValueError, IndexError) as e:
             print("Erro ao excluir atendimento:", e)
@@ -198,12 +206,16 @@ class AtendimentoController:
             indice_atendimento = int(input("Escolha o atendimento: "))
             atendimento = self.atendimentos[indice_atendimento]
 
-            descricao = input("Descricao do procedimento: ")
+            descricao = input("Descrição do procedimento: ")
             custo = float(input("Custo do procedimento: "))
 
             procedimento = Procedimento(descricao, custo)
 
+            if not hasattr(atendimento, "procedimentos"):
+                atendimento.procedimentos = []
+
             atendimento.procedimentos.append(procedimento)
+            self.dao.salvar(self.atendimentos)
 
             print("Procedimento adicionado com sucesso.")
         except (ValueError, IndexError) as e:

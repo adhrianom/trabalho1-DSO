@@ -58,7 +58,7 @@ class ProfissionalSaudeController:
             profissional = self.profissionais.pop(indice)
             self.dao.salvar(self.profissionais)
 
-            self.view.mostrarMensagem(f"Profissional excluÃ­do com sucesso: {profissional.nome}")
+            self.view.mostrarMensagem(f"Profissional excluído com sucesso: {profissional.nome}")
             self.view.limparCampos()
             self.listar()
         except (ValueError, IndexError) as e:

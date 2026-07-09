@@ -53,7 +53,7 @@ class TipoAtendimentoController:
             tipo = self.tipos_atendimento.pop(indice)
             self.dao.salvar(self.tipos_atendimento)
 
-            self.view.mostrarMensagem(f"Tipo de atendimento excluÃ­do com sucesso: {tipo.descricao}")
+            self.view.mostrarMensagem(f"Tipo de atendimento excluído com sucesso: {tipo.descricao}")
             self.view.limparCampos()
             self.listar()
         except (ValueError, IndexError) as e:
