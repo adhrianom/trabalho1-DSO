@@ -8,48 +8,67 @@ class PagamentoView:
 
         self.janela = tk.Toplevel()
         self.janela.title("Registro de Pagamentos")
-        self.janela.geometry("850x500")
+        self.janela.geometry("850x550")
 
         self.criarFormulario()
         self.criarTabela()
         self.criarBotoes()
 
     def criarFormulario(self):
-        frame = tk.Frame(self.janela)
-        frame.pack(pady=10)
+        self.frame_formulario = tk.Frame(self.janela)
+        self.frame_formulario.pack(pady=10)
 
-        tk.Label(frame, text="Atendimento").grid(row=0, column=0, padx=5, pady=5)
-        self.combo_atendimento = ttk.Combobox(frame, width=45, state="readonly")
+        tk.Label(self.frame_formulario, text="Atendimento").grid(row=0, column=0, padx=5, pady=5)
+        self.combo_atendimento = ttk.Combobox(self.frame_formulario, width=45, state="readonly")
         self.combo_atendimento.grid(row=0, column=1, padx=5, pady=5)
 
-        tk.Label(frame, text="Data Pagamento (DD/MM/AAAA)").grid(row=1, column=0, padx=5, pady=5)
-        self.entry_data = tk.Entry(frame, width=30)
+        tk.Label(self.frame_formulario, text="Data Pagamento (DD/MM/AAAA)").grid(row=1, column=0, padx=5, pady=5)
+        self.entry_data = tk.Entry(self.frame_formulario, width=30)
         self.entry_data.grid(row=1, column=1, padx=5, pady=5)
 
-        tk.Label(frame, text="Valor Pago").grid(row=2, column=0, padx=5, pady=5)
-        self.entry_valor = tk.Entry(frame, width=30)
+        tk.Label(self.frame_formulario, text="Valor Pago").grid(row=2, column=0, padx=5, pady=5)
+        self.entry_valor = tk.Entry(self.frame_formulario, width=30)
         self.entry_valor.grid(row=2, column=1, padx=5, pady=5)
 
-        tk.Label(frame, text="Tipo").grid(row=3, column=0, padx=5, pady=5)
+        tk.Label(self.frame_formulario, text="Tipo").grid(row=3, column=0, padx=5, pady=5)
         self.combo_tipo = ttk.Combobox(
-            frame,
+            self.frame_formulario,
             width=30,
             state="readonly",
             values=("Dinheiro", "PIX", "Cartão de Crédito")
         )
         self.combo_tipo.grid(row=3, column=1, padx=5, pady=5)
+        self.combo_tipo.bind("<<ComboboxSelected>>", self.atualizarCamposTipo)
 
-        tk.Label(frame, text="CPF Pagador (PIX)").grid(row=4, column=0, padx=5, pady=5)
-        self.entry_cpf_pagador = tk.Entry(frame, width=30)
-        self.entry_cpf_pagador.grid(row=4, column=1, padx=5, pady=5)
+        self.label_cpf_pagador = tk.Label(self.frame_formulario, text="CPF Pagador (PIX)")
+        self.entry_cpf_pagador = tk.Entry(self.frame_formulario, width=30)
 
-        tk.Label(frame, text="Número Cartão").grid(row=5, column=0, padx=5, pady=5)
-        self.entry_numero_cartao = tk.Entry(frame, width=30)
-        self.entry_numero_cartao.grid(row=5, column=1, padx=5, pady=5)
+        self.label_numero_cartao = tk.Label(self.frame_formulario, text="Número Cartão")
+        self.entry_numero_cartao = tk.Entry(self.frame_formulario, width=30)
 
-        tk.Label(frame, text="Bandeira").grid(row=6, column=0, padx=5, pady=5)
-        self.entry_bandeira = tk.Entry(frame, width=30)
-        self.entry_bandeira.grid(row=6, column=1, padx=5, pady=5)
+        self.label_bandeira = tk.Label(self.frame_formulario, text="Bandeira")
+        self.entry_bandeira = tk.Entry(self.frame_formulario, width=30)
+
+    def atualizarCamposTipo(self, event=None):
+        self.label_cpf_pagador.grid_forget()
+        self.entry_cpf_pagador.grid_forget()
+        self.label_numero_cartao.grid_forget()
+        self.entry_numero_cartao.grid_forget()
+        self.label_bandeira.grid_forget()
+        self.entry_bandeira.grid_forget()
+
+        tipo = self.combo_tipo.get()
+
+        if tipo == "PIX":
+            self.label_cpf_pagador.grid(row=4, column=0, padx=5, pady=5)
+            self.entry_cpf_pagador.grid(row=4, column=1, padx=5, pady=5)
+
+        elif tipo == "Cartão de Crédito":
+            self.label_numero_cartao.grid(row=4, column=0, padx=5, pady=5)
+            self.entry_numero_cartao.grid(row=4, column=1, padx=5, pady=5)
+
+            self.label_bandeira.grid(row=5, column=0, padx=5, pady=5)
+            self.entry_bandeira.grid(row=5, column=1, padx=5, pady=5)
 
     def criarTabela(self):
         colunas = ("data", "valor", "tipo")
@@ -63,18 +82,45 @@ class PagamentoView:
         self.tabela.bind("<<TreeviewSelect>>", self.preencherCampos)
 
     def criarBotoes(self):
-        frame = tk.Frame(self.janela)
-        frame.pack(pady=10)
+        frame_botoes = tk.Frame(self.janela)
+        frame_botoes.pack(pady=10)
 
-        tk.Button(frame, text="Incluir", width=12, command=self.controller.incluir).grid(row=0, column=0, padx=5)
-        tk.Button(frame, text="Alterar", width=12, command=self.controller.alterar).grid(row=0, column=1, padx=5)
-        tk.Button(frame, text="Excluir", width=12, command=self.controller.excluir).grid(row=0, column=2, padx=5)
-        tk.Button(frame, text="Limpar", width=12, command=self.limparCampos).grid(row=0, column=3, padx=5)
+        tk.Button(
+            frame_botoes,
+            text="Incluir",
+            width=12,
+            command=self.controller.incluir
+        ).grid(row=0, column=0, padx=5)
+
+        tk.Button(
+            frame_botoes,
+            text="Alterar",
+            width=12,
+            command=self.controller.alterar
+        ).grid(row=0, column=1, padx=5)
+
+        tk.Button(
+            frame_botoes,
+            text="Excluir",
+            width=12,
+            command=self.controller.excluir
+        ).grid(row=0, column=2, padx=5)
+
+        tk.Button(
+            frame_botoes,
+            text="Limpar",
+            width=12,
+            command=self.limparCampos
+        ).grid(row=0, column=3, padx=5)
 
     def atualizarCombos(self, atendimentos):
         valores = []
+
         for atendimento in atendimentos:
-            valores.append(f"{atendimento.paciente.nome} - {atendimento.data.strftime('%d/%m/%Y')} - R$ {atendimento.valor}")
+            valores.append(
+                f"{atendimento.paciente.nome} - {atendimento.data.strftime('%d/%m/%Y')} - R$ {atendimento.valor}"
+            )
+
         self.combo_atendimento["values"] = valores
 
     def lerDados(self):
@@ -128,22 +174,31 @@ class PagamentoView:
 
         if pagamento.__class__.__name__ == "PagamentoDinheiro":
             self.combo_tipo.set("Dinheiro")
+
         elif pagamento.__class__.__name__ == "PagamentoPix":
             self.combo_tipo.set("PIX")
+            self.atualizarCamposTipo()
             self.entry_cpf_pagador.insert(0, pagamento.cpfPagador)
+
         elif pagamento.__class__.__name__ == "PagamentoCartaoCredito":
             self.combo_tipo.set("Cartão de Crédito")
+            self.atualizarCamposTipo()
             self.entry_numero_cartao.insert(0, pagamento.numeroCartao)
             self.entry_bandeira.insert(0, pagamento.bandeira)
+
+        self.atualizarCamposTipo()
 
     def limparCampos(self):
         self.combo_atendimento.set("")
         self.entry_data.delete(0, tk.END)
         self.entry_valor.delete(0, tk.END)
         self.combo_tipo.set("")
+
         self.entry_cpf_pagador.delete(0, tk.END)
         self.entry_numero_cartao.delete(0, tk.END)
         self.entry_bandeira.delete(0, tk.END)
+
+        self.atualizarCamposTipo()
 
     def mostrarMensagem(self, mensagem):
         messagebox.showinfo("Mensagem", mensagem)

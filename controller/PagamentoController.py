@@ -18,6 +18,28 @@ class PagamentoController:
         self.view.atualizarCombos(self.atendimentos)
         self.listar()
 
+    def calcularTotalPago(self, atendimento, pagamento_ignorado=None):
+        total = 0
+
+        if hasattr(atendimento, "pagamentos"):
+            for pagamento in atendimento.pagamentos:
+                if pagamento is not pagamento_ignorado:
+                    total += pagamento.valorPago
+
+        return total
+
+    def criarPagamento(self, tipo, data, valor_pago, cpf_pagador, numero_cartao, bandeira):
+        if tipo == "Dinheiro":
+            return PagamentoDinheiro(data, valor_pago)
+
+        if tipo == "PIX":
+            return PagamentoPix(cpf_pagador, data, valor_pago)
+
+        if tipo == "Cartão de Crédito":
+            return PagamentoCartaoCredito(numero_cartao, bandeira, data, valor_pago)
+
+        raise ValueError("Selecione o tipo de pagamento.")
+
     def incluir(self):
         if len(self.atendimentos) == 0:
             self.view.mostrarErro("Nenhum atendimento cadastrado.")
@@ -38,17 +60,19 @@ class PagamentoController:
 
             valor_pago = float(valor_str)
 
-            if tipo == "Dinheiro":
-                pagamento = PagamentoDinheiro(data, valor_pago)
+            total_pago = self.calcularTotalPago(atendimento)
 
-            elif tipo == "PIX":
-                pagamento = PagamentoPix(cpf_pagador, data, valor_pago)
+            if total_pago + valor_pago > atendimento.valor:
+                raise ValueError("O valor pago ultrapassa o valor total do atendimento.")
 
-            elif tipo == "Cartão de Crédito":
-                pagamento = PagamentoCartaoCredito(numero_cartao, bandeira, data, valor_pago)
-
-            else:
-                raise ValueError("Selecione o tipo de pagamento.")
+            pagamento = self.criarPagamento(
+                tipo,
+                data,
+                valor_pago,
+                cpf_pagador,
+                numero_cartao,
+                bandeira
+            )
 
             self.pagamentos.append(pagamento)
 
@@ -80,6 +104,8 @@ class PagamentoController:
 
         try:
             indice_pagamento = self.view.lerIndiceSelecionado()
+            pagamento_antigo = self.pagamentos[indice_pagamento]
+
             indice_atendimento, data_str, valor_str, tipo, cpf_pagador, numero_cartao, bandeira = self.view.lerDados()
 
             if indice_atendimento < 0:
@@ -94,22 +120,27 @@ class PagamentoController:
 
             valor_pago = float(valor_str)
 
-            if tipo == "Dinheiro":
-                novo_pagamento = PagamentoDinheiro(data, valor_pago)
+            total_pago = self.calcularTotalPago(atendimento, pagamento_antigo)
 
-            elif tipo == "PIX":
-                novo_pagamento = PagamentoPix(cpf_pagador, data, valor_pago)
+            if total_pago + valor_pago > atendimento.valor:
+                raise ValueError("O valor pago ultrapassa o valor total do atendimento.")
 
-            elif tipo == "Cartão de Crédito":
-                novo_pagamento = PagamentoCartaoCredito(numero_cartao, bandeira, data, valor_pago)
-
-            else:
-                raise ValueError("Selecione o tipo de pagamento.")
+            novo_pagamento = self.criarPagamento(
+                tipo,
+                data,
+                valor_pago,
+                cpf_pagador,
+                numero_cartao,
+                bandeira
+            )
 
             self.pagamentos[indice_pagamento] = novo_pagamento
 
             if not hasattr(atendimento, "pagamentos"):
                 atendimento.pagamentos = []
+
+            if pagamento_antigo in atendimento.pagamentos:
+                atendimento.pagamentos.remove(pagamento_antigo)
 
             atendimento.pagamentos.append(novo_pagamento)
 
@@ -125,6 +156,10 @@ class PagamentoController:
         try:
             indice = self.view.lerIndiceSelecionado()
             pagamento = self.pagamentos.pop(indice)
+
+            for atendimento in self.atendimentos:
+                if hasattr(atendimento, "pagamentos") and pagamento in atendimento.pagamentos:
+                    atendimento.pagamentos.remove(pagamento)
 
             self.dao.salvar(self.pagamentos)
 
