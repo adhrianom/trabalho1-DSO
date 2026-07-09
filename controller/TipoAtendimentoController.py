@@ -1,62 +1,54 @@
 from model.TipoAtendimento import TipoAtendimento
+from view.TipoAtendimentoView import TipoAtendimentoView
 
 
 class TipoAtendimentoController:
     def __init__(self, tipos_atendimento):
         self.tipos_atendimento = tipos_atendimento
+        self.view = None
 
+    def abrirTela(self):
+        self.view = TipoAtendimentoView(self)
+        self.listar()
 
     def incluir(self):
         try:
-            descricao = input("Descrição: ")
+            descricao = self.view.lerDados()
 
-            tipo_atendimento = TipoAtendimento(descricao)
-            self.tipos_atendimento.append(tipo_atendimento)
+            tipo = TipoAtendimento(descricao)
+            self.tipos_atendimento.append(tipo)
 
-            print("Tipo de atendimento cadastrado com sucesso.")
+            self.view.mostrarMensagem("Tipo de atendimento cadastrado com sucesso.")
+            self.view.limparCampos()
+            self.listar()
         except ValueError as e:
-            print("Erro ao cadastrar tipo de atendimento:", e)
+            self.view.mostrarErro(f"Erro ao cadastrar tipo de atendimento: {e}")
 
     def listar(self):
-        if len(self.tipos_atendimento) == 0:
-            print("Nenhum tipo de atendimento cadastrado.")
-            return
-
-        print("\nLista de tipos de atendimento:")
-        for i in range(len(self.tipos_atendimento)):
-            tipo_atendimento = self.tipos_atendimento[i]
-            print(i, "-", tipo_atendimento.descricao)
+        if self.view is not None:
+            self.view.mostrarLista(self.tipos_atendimento)
 
     def alterar(self):
-        if len(self.tipos_atendimento) == 0:
-            print("Nenhum tipo de atendimento cadastrado.")
-            return
-
-        self.listar()
-
         try:
-            indice = int(input("Digite o indice do tipo de atendimento que deseja alterar: "))
-            tipo_atendimento = self.tipos_atendimento[indice]
+            indice = self.view.lerIndiceSelecionado()
+            tipo = self.tipos_atendimento[indice]
 
-            descricao = input("Nova descrição: ")
+            descricao = self.view.lerDados()
+            tipo.descricao = descricao
 
-            tipo_atendimento.descricao = descricao
-
-            print("Tipo de atendimento alterado com sucesso.")
-    
+            self.view.mostrarMensagem("Tipo de atendimento alterado com sucesso.")
+            self.view.limparCampos()
+            self.listar()
         except (ValueError, IndexError) as e:
-            print("Erro ao alterar tipo de atendimento:", e)
+            self.view.mostrarErro(f"Erro ao alterar tipo de atendimento: {e}")
 
     def excluir(self):
-        if len(self.tipos_atendimento) == 0:
-            print("Nenhum tipo de atendimento cadastrado.")
-            return
-
-        self.listar()
-
         try:
-            indice = int(input("Digite o indice do tipo de atendimento que deseja excluir: "))
-            removido = self.tipos_atendimento.pop(indice)
-            print("Tipo de atendimento excluido com sucesso:", removido.descricao)
+            indice = self.view.lerIndiceSelecionado()
+            tipo = self.tipos_atendimento.pop(indice)
+
+            self.view.mostrarMensagem(f"Tipo de atendimento excluído com sucesso: {tipo.descricao}")
+            self.view.limparCampos()
+            self.listar()
         except (ValueError, IndexError) as e:
-            print("Erro ao excluir tipo de atendimento:", e)
+            self.view.mostrarErro(f"Erro ao excluir tipo de atendimento: {e}")

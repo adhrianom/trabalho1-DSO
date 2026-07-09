@@ -80,52 +80,10 @@ class SistemaController:
         self.paciente_controller.abrirTela()
 
     def menuProfissionalSaude(self):
-        while True:
-            print("\n=== MENU PROFISSIONAL DE SAÚDE ===")
-            print("1 - Incluir")
-            print("2 - Listar")
-            print("3 - Alterar")
-            print("4 - Excluir")
-            print("0 - Voltar")
-
-            opcao = input("Escolha uma opção: ")
-
-            if opcao == "1":
-                self.profissional_controller.incluir()
-            elif opcao == "2":
-                self.profissional_controller.listar()
-            elif opcao == "3":
-                self.profissional_controller.alterar()
-            elif opcao == "4":
-                self.profissional_controller.excluir()
-            elif opcao == "0":
-                break
-            else:
-                print("Opcao invalida.")
+        self.profissional_controller.abrirTela()
 
     def menuTipoAtendimento(self):
-        while True:
-            print("\n=== MENU TIPO DE ATENDIMENTO ===")
-            print("1 - Incluir")
-            print("2 - Listar")
-            print("3 - Alterar")
-            print("4 - Excluir")
-            print("0 - Voltar")
-
-            opcao = input("Escolha uma opcao: ")
-
-            if opcao == "1":
-                    self.tipo_atendimento_controller.incluir()
-            elif opcao == "2":
-                    self.tipo_atendimento_controller.listar()
-            elif opcao == "3":
-                    self.tipo_atendimento_controller.alterar()
-            elif opcao == "4":
-                    self.tipo_atendimento_controller.excluir()
-            elif opcao == "0":
-                    break
-            else:
-                    print("Opção invalida.")
+        self.tipo_atendimento_controller.abrirTela()
     
     def abrirMenuRegistros(self):
         while True:
